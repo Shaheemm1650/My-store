@@ -32,6 +32,8 @@ export function formatDate(value: string | Date, withTime = true) {
 
 export function productImageUrl(path: string | null | undefined) {
   if (!path) return null;
+  // Bundled sample images (see supabase/seed.sql) are served from /public.
+  if (path.startsWith("/")) return path;
   return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${BUCKETS.productImages}/${path}`;
 }
 
