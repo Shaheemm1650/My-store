@@ -1,7 +1,7 @@
 import "server-only";
 import sharp from "sharp";
 
-export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // hard cap per request (client already compresses)
+export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // hard cap per request (client already compresses)
 const ACCEPTED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif", "image/heic", "image/heif"]);
 
 export type ImagePreset = "product" | "slip";
@@ -23,7 +23,7 @@ export class ImageValidationError extends Error {}
 export async function processImage(file: unknown, preset: ImagePreset) {
   if (!(file instanceof File)) throw new ImageValidationError("No file provided.");
   if (file.size === 0) throw new ImageValidationError("The file is empty.");
-  if (file.size > MAX_UPLOAD_BYTES) throw new ImageValidationError("Image is too large (max 4 MB).");
+  if (file.size > MAX_UPLOAD_BYTES) throw new ImageValidationError("Image is too large (max 8 MB).");
   if (file.type && !ACCEPTED_MIME.has(file.type)) throw new ImageValidationError("Unsupported file type.");
 
   const input = Buffer.from(await file.arrayBuffer());

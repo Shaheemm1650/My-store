@@ -3,9 +3,9 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-import { ChevronLeft, ChevronRight, ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImagePlus, Link2, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { deleteProductImage, moveProductImage, uploadProductImage } from "@/actions/admin-products";
+import { deleteProductImage, importProductImageFromUrl, moveProductImage, uploadProductImage } from "@/actions/admin-products";
 import { compressImage } from "@/lib/compress-image";
 import type { ProductImage } from "@/lib/types";
 import { productImageUrl } from "@/lib/utils";
@@ -17,6 +17,34 @@ export function ImageManager({ productId, images }: { productId: string; images:
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState<{ done: number; total: number } | null>(null);
   const [pending, startTransition] = useTransition();
+  const [urls, setUrls] = useState("");
+  const [importing, setImporting] = useState<{ done: number; total: number } | null>(null);
+
+  async function onImport(e: React.FormEvent) {
+    e.preventDefault();
+    const list = urls
+      .split(/\s+/)
+      .map((u) => u.trim())
+      .filter(Boolean)
+      .slice(0, MAX_IMAGES - images.length);
+    if (!list.length) return;
+    setImporting({ done: 0, total: list.length });
+    let ok = 0;
+    const failed: string[] = [];
+    for (const [i, url] of list.entries()) {
+      const r = await importProductImageFromUrl(productId, url);
+      if (r.ok) ok++;
+      else {
+        failed.push(url);
+        toast.error(r.error, { description: url.length > 60 ? url.slice(0, 57) + "…" : url });
+      }
+      setImporting({ done: i + 1, total: list.length });
+    }
+    setImporting(null);
+    setUrls(failed.join("\n"));
+    if (ok) toast.success(`${ok} image(s) added`);
+    router.refresh();
+  }
 
   async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []).slice(0, MAX_IMAGES - images.length);
@@ -110,6 +138,30 @@ export function ImageManager({ productId, images }: { productId: string; images:
           </li>
         )}
       </ul>
+
+      {images.length < MAX_IMAGES && (
+        <form onSubmit={onImport} className="mt-5 border-t border-line pt-5">
+          <label htmlFor="image-urls" className="label flex items-center gap-2">
+            <Link2 className="size-4" aria-hidden /> Add images from links
+          </label>
+          <textarea
+            id="image-urls"
+            value={urls}
+            onChange={(e) => setUrls(e.target.value)}
+            rows={2}
+            placeholder="https://example.com/photo.jpg (one link per line)"
+            className="input font-mono text-xs"
+            disabled={!!importing}
+          />
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <p className="text-xs text-muted">Downloaded and compressed on the server. Only use images you have the right to use.</p>
+            <button type="submit" className="btn-secondary shrink-0" disabled={!urls.trim() || !!importing}>
+              {importing ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <ImagePlus className="size-4" aria-hidden />}
+              {importing ? `Importing ${importing.done}/${importing.total}` : "Import"}
+            </button>
+          </div>
+        </form>
+      )}
     </section>
   );
 }

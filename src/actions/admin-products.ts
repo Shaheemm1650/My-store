@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { assertAdmin } from "@/lib/auth";
 import { BUCKETS } from "@/lib/env";
+import { z } from "zod";
 import { ImageValidationError, processImage } from "@/lib/images.server";
+import { downloadImage } from "@/lib/remote-image.server";
 import { fieldErrors, productSchema, uuidSchema } from "@/lib/validation";
 import { toMinor } from "@/lib/utils";
 import type { ActionResult } from "@/lib/types";
@@ -88,20 +90,12 @@ export async function deleteProduct(productId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-export async function uploadProductImage(formData: FormData): Promise<ActionResult> {
-  await assertAdmin();
-  const productId = uuidSchema.safeParse(formData.get("productId"));
-  if (!productId.success) return { ok: false, error: "Invalid product." };
+type ProcessedImage = Awaited<ReturnType<typeof processImage>>;
 
-  let image;
-  try {
-    image = await processImage(formData.get("file"), "product");
-  } catch (e) {
-    return { ok: false, error: e instanceof ImageValidationError ? e.message : "Could not process the image." };
-  }
-
+/** Uploads a processed image to storage and appends it to the product's gallery. */
+async function saveProductImage(productId: string, image: ProcessedImage): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: product } = await supabase.from("products").select("id, slug, name").eq("id", productId.data).maybeSingle();
+  const { data: product } = await supabase.from("products").select("id, slug, name").eq("id", productId).maybeSingle();
   if (!product) return { ok: false, error: "Product not found." };
 
   const path = `${product.id}/${crypto.randomUUID()}.webp`;
@@ -110,7 +104,7 @@ export async function uploadProductImage(formData: FormData): Promise<ActionResu
     .upload(path, image.buffer, { contentType: image.contentType, cacheControl: "31536000", upsert: false });
   if (uploadError) {
     console.error("product image upload failed", uploadError);
-    return { ok: false, error: "Upload failed." };
+    return { ok: false, error: "Upload failed. Has the storage setup (3_storage.sql) been run?" };
   }
 
   const { data: last } = await supabase
@@ -137,6 +131,37 @@ export async function uploadProductImage(formData: FormData): Promise<ActionResu
   revalidateCatalog(product.slug);
   revalidatePath(`/admin/products/${product.id}`);
   return { ok: true };
+}
+
+export async function uploadProductImage(formData: FormData): Promise<ActionResult> {
+  await assertAdmin();
+  const productId = uuidSchema.safeParse(formData.get("productId"));
+  if (!productId.success) return { ok: false, error: "Invalid product." };
+
+  try {
+    return await saveProductImage(productId.data, await processImage(formData.get("file"), "product"));
+  } catch (e) {
+    return { ok: false, error: e instanceof ImageValidationError ? e.message : "Could not process the image." };
+  }
+}
+
+const urlSchema = z.string().trim().url().max(2048);
+
+/** Admin: import an image from a public https link (downloaded and compressed on the server). */
+export async function importProductImageFromUrl(productId: string, url: string): Promise<ActionResult> {
+  await assertAdmin();
+  const id = uuidSchema.safeParse(productId);
+  const link = urlSchema.safeParse(url);
+  if (!id.success) return { ok: false, error: "Invalid product." };
+  if (!link.success) return { ok: false, error: "Enter a valid image link." };
+
+  try {
+    const file = await downloadImage(link.data);
+    return await saveProductImage(id.data, await processImage(file, "product"));
+  } catch (e) {
+    if (!(e instanceof ImageValidationError)) console.error("image import failed", e);
+    return { ok: false, error: e instanceof ImageValidationError ? e.message : "Could not import that image." };
+  }
 }
 
 export async function deleteProductImage(imageId: string): Promise<ActionResult> {
