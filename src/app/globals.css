@@ -10,9 +10,12 @@
   --color-line: #e7e8ec;
   --color-surface: #ffffff;
   --color-canvas: #f7f7f8;
-  --color-brand: #0f6b5c;
-  --color-brand-dark: #0a5247;
-  --color-brand-soft: #e6f2ef;
+  /* Brand colours taken from the logo */
+  --color-brand: #3628a0;
+  --color-brand-dark: #271c7a;
+  --color-brand-soft: #eeecfa;
+  --color-accent: #06d1d4;
+  --color-accent-soft: #e2fafa;
   --color-danger: #c2362b;
   --color-warning: #b26a00;
 

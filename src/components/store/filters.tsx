@@ -33,7 +33,7 @@ export function Filters({ categories, sortOptions }: Props) {
   }
 
   const active = params.get("category");
-  const hasFilters = ["category", "min", "max", "stock", "q"].some((k) => params.has(k));
+  const hasFilters = ["category", "min", "max", "stock", "sale", "q"].some((k) => params.has(k));
 
   const body = (
     <div className={cn("space-y-8", pending && "opacity-60 transition-opacity")}>
@@ -62,7 +62,7 @@ export function Filters({ categories, sortOptions }: Props) {
             <button
               type="button"
               onClick={() => update({ category: null })}
-              className={cn("w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-white", !active && "bg-white font-medium ring-1 ring-line")}
+              className={cn("w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-white", !active && "bg-brand-soft font-medium text-brand")}
             >
               All products
             </button>
@@ -75,7 +75,7 @@ export function Filters({ categories, sortOptions }: Props) {
                 aria-pressed={active === c.slug}
                 className={cn(
                   "w-full rounded-md px-2 py-1.5 text-left text-sm hover:bg-white",
-                  active === c.slug && "bg-white font-medium ring-1 ring-line",
+                  active === c.slug && "bg-brand-soft font-medium text-brand",
                 )}
               >
                 {c.name}
@@ -99,15 +99,27 @@ export function Filters({ categories, sortOptions }: Props) {
         </fieldset>
       </form>
 
-      <label className="flex cursor-pointer items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          className="size-4 accent-(--color-brand)"
-          checked={params.get("stock") === "1"}
-          onChange={(e) => update({ stock: e.target.checked ? "1" : null })}
-        />
-        In stock only
-      </label>
+      <fieldset className="space-y-2.5">
+        <legend className="label">Availability</legend>
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="size-4 accent-(--color-brand)"
+            checked={params.get("stock") === "1"}
+            onChange={(e) => update({ stock: e.target.checked ? "1" : null })}
+          />
+          In stock only
+        </label>
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            className="size-4 accent-(--color-brand)"
+            checked={params.get("sale") === "1"}
+            onChange={(e) => update({ sale: e.target.checked ? "1" : null })}
+          />
+          On sale
+        </label>
+      </fieldset>
 
       {hasFilters && (
         <button type="button" onClick={() => startTransition(() => router.push("/products"))} className="btn-ghost -ml-2 px-2 text-danger">
@@ -125,7 +137,7 @@ export function Filters({ categories, sortOptions }: Props) {
         </summary>
         <div className="mt-5">{body}</div>
       </details>
-      <aside className="hidden lg:block">{body}</aside>
+      <aside className="hidden h-fit rounded-(--radius-card) border border-line bg-white p-5 lg:sticky lg:top-44 lg:block">{body}</aside>
     </>
   );
 }

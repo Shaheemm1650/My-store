@@ -71,6 +71,10 @@ export interface ProductCardData {
   category_slug: string | null;
   image_path: string | null;
   is_featured: boolean;
+  /** Present once the storefront_v2 migration is applied. */
+  variant_count?: number;
+  default_variant_id?: string | null;
+  default_variant_name?: string | null;
 }
 
 export interface Order {

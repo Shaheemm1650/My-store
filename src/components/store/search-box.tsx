@@ -16,18 +16,21 @@ export function SearchBox() {
   }
 
   return (
-    <form role="search" onSubmit={onSubmit} className="relative w-full sm:max-w-md">
-      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-subtle" aria-hidden />
+    <form role="search" onSubmit={onSubmit} className="flex w-full overflow-hidden rounded-full border-2 border-brand bg-white focus-within:ring-4 focus-within:ring-brand/15">
       <input
         key={params.get("q") ?? ""}
         name="q"
         type="search"
         defaultValue={params.get("q") ?? ""}
-        placeholder="Search products…"
+        placeholder="Search for products, brands and more…"
         aria-label="Search products"
         maxLength={100}
-        className="input rounded-full bg-canvas pl-9"
+        className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm outline-none placeholder:text-subtle"
       />
+      <button type="submit" className="flex items-center gap-2 bg-brand px-4 text-sm font-medium text-white transition hover:bg-brand-dark sm:px-6" aria-label="Search">
+        <Search className="size-4" aria-hidden />
+        <span className="hidden md:inline">Search</span>
+      </button>
     </form>
   );
 }

@@ -21,6 +21,7 @@ export interface SearchParams {
   sort?: string;
   page?: number;
   featured?: boolean;
+  onSale?: boolean;
 }
 
 export const getCategories = cache(async (): Promise<Category[]> => {
@@ -36,7 +37,7 @@ export const getCategories = cache(async (): Promise<Category[]> => {
 export async function searchProducts(params: SearchParams, pageSize = PAGE_SIZE) {
   const supabase = await createClient();
   const page = Math.max(1, params.page ?? 1);
-  const { data, error } = await supabase.rpc("search_products", {
+  const args: Record<string, unknown> = {
     p_query: params.q ?? null,
     p_category: params.category ?? null,
     p_min_price: params.min ?? null,
@@ -46,7 +47,17 @@ export async function searchProducts(params: SearchParams, pageSize = PAGE_SIZE)
     p_limit: pageSize,
     p_offset: (page - 1) * pageSize,
     p_featured: params.featured ?? false,
-  });
+  };
+  if (params.onSale) args.p_on_sale = true;
+
+  let { data, error } = await supabase.rpc("search_products", args);
+
+  // PGRST202 = function signature not found. Happens if the storefront_v2 migration
+  // hasn't been applied yet: retry without the newer argument so the shop keeps working.
+  if (error?.code === "PGRST202" && "p_on_sale" in args) {
+    delete args.p_on_sale;
+    ({ data, error } = await supabase.rpc("search_products", args));
+  }
 
   if (error) {
     console.error("search_products failed", error);
@@ -94,5 +105,6 @@ export function parseSearchParams(sp: Record<string, string | string[] | undefin
     inStock: str("stock") === "1",
     sort: SORT_OPTIONS.some((o) => o.value === sort) ? sort : undefined,
     page: Number.isInteger(page) && page > 0 && page < 10_000 ? page : 1,
+    onSale: str("sale") === "1",
   };
 }

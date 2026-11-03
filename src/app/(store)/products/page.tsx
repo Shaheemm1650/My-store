@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import Link from "next/link";
 import { PackageSearch } from "lucide-react";
 import { Filters } from "@/components/store/filters";
 import { ProductGrid } from "@/components/store/product-card";
@@ -29,16 +30,25 @@ export default async function ProductsPage({ searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {params.q ? <>Results for &ldquo;{params.q}&rdquo;</> : (category?.name ?? "All products")}
-        </h1>
-        <p className="mt-1 text-sm text-muted">
+      <nav aria-label="Breadcrumb" className="mb-3 flex items-center gap-1.5 text-sm text-muted">
+        <Link href="/" className="hover:text-ink">Home</Link>
+        <span aria-hidden>/</span>
+        <Link href="/products" className="hover:text-ink">Shop</Link>
+        {category && (<><span aria-hidden>/</span><span className="text-ink">{category.name}</span></>)}
+      </nav>
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            {params.q ? <>Results for &ldquo;{params.q}&rdquo;</> : params.onSale ? "Deals & offers" : (category?.name ?? "All products")}
+          </h1>
+          {category?.description && !params.q && <p className="mt-1 text-sm text-muted">{category.description}</p>}
+        </div>
+        <p className="text-sm text-muted">
           {result.total} {result.total === 1 ? "product" : "products"}
         </p>
       </div>
 
-      <div className="lg:grid lg:grid-cols-[230px_1fr] lg:gap-10">
+      <div className="lg:grid lg:grid-cols-[250px_1fr] lg:gap-8">
         <Suspense>
           <Filters categories={categories} sortOptions={SORT_OPTIONS} />
         </Suspense>

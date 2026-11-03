@@ -25,8 +25,12 @@ export function UserMenu({ user }: { user: { name: string; isAdmin: boolean } | 
 
   if (!user) {
     return (
-      <Link href="/login" className="btn-ghost px-3">
-        Sign in
+      <Link href="/login" className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 transition hover:bg-canvas">
+        <User className="size-6" aria-hidden />
+        <span className="hidden flex-col leading-tight lg:flex">
+          <span className="text-[11px] text-muted">Hello, sign in</span>
+          <span className="text-sm font-semibold">Account</span>
+        </span>
       </Link>
     );
   }
@@ -35,12 +39,16 @@ export function UserMenu({ user }: { user: { name: string; isAdmin: boolean } | 
     <div className="relative" ref={ref}>
       <button
         type="button"
-        className="btn-ghost px-2.5"
+        className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition hover:bg-canvas"
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        <User className="size-5" aria-hidden />
+        <User className="size-6" aria-hidden />
+        <span className="hidden max-w-32 flex-col leading-tight lg:flex">
+          <span className="text-[11px] text-muted">Hello,</span>
+          <span className="truncate text-sm font-semibold">{user.name.split(" ")[0]}</span>
+        </span>
         <span className="sr-only">Account menu</span>
       </button>
       {open && (
