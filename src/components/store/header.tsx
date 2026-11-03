@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { env } from "@/lib/env";
+import { Logo } from "@/components/ui/logo";
 import { CartButton } from "./cart-button";
 import { SearchBox } from "./search-box";
 import { UserMenu } from "./user-menu";
@@ -13,9 +14,7 @@ export async function Header() {
     <header className="sticky top-0 z-40 border-b border-line bg-white/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2 font-semibold tracking-tight">
-          <span className="grid size-8 place-items-center rounded-lg bg-brand text-sm font-bold text-white" aria-hidden>
-            {env.NEXT_PUBLIC_STORE_NAME.charAt(0)}
-          </span>
+          <Logo className="h-9" priority />
           <span className="hidden sm:inline">{env.NEXT_PUBLIC_STORE_NAME}</span>
         </Link>
 

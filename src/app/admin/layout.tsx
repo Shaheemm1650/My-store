@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { Logo } from "@/components/ui/logo";
 import { requireAdmin } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
@@ -21,9 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="border-b border-line bg-canvas p-4 lg:sticky lg:top-0 lg:h-dvh lg:border-b-0 lg:border-r lg:p-5">
         <div className="mb-4 flex items-center justify-between lg:mb-8">
           <Link href="/admin" className="flex items-center gap-2 font-semibold">
-            <span className="grid size-8 place-items-center rounded-lg bg-brand text-sm text-white" aria-hidden>
-              {env.NEXT_PUBLIC_STORE_NAME.charAt(0)}
-            </span>
+            <Logo className="h-8" />
             Admin
           </Link>
           <Link href="/" className="btn-ghost px-2 text-xs lg:hidden">
