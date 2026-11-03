@@ -521,3 +521,6 @@ end;
 $$;
 
 grant execute on function public.search_products(text, text, integer, integer, boolean, text, integer, integer, boolean, boolean) to anon, authenticated;
+
+-- Tell the Supabase API to pick up the new functions immediately.
+notify pgrst, 'reload schema';

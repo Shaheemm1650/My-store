@@ -59,3 +59,6 @@ drop policy if exists "slips_admin_delete" on storage.objects;
 create policy "slips_admin_delete" on storage.objects
   for delete to authenticated
   using (bucket_id = 'payment-slips' and (select public.is_admin()));
+
+-- Tell the Supabase API to pick up the new functions immediately.
+notify pgrst, 'reload schema';
