@@ -34,6 +34,8 @@ export function productImageUrl(path: string | null | undefined) {
   if (!path) return null;
   // Bundled sample images (see supabase/seed.sql) are served from /public.
   if (path.startsWith("/")) return path;
+  // External images (e.g. demo catalogue) must also be allowed in next.config.ts → images.remotePatterns.
+  if (path.startsWith("https://")) return path;
   return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${BUCKETS.productImages}/${path}`;
 }
 

@@ -27,6 +27,8 @@ const nextConfig: NextConfig = {
         hostname: supabaseHost,
         pathname: "/storage/v1/object/public/product-images/**",
       },
+      // Demo catalogue images (supabase/demo-products.sql)
+      { protocol: "https", hostname: "cdn.dummyjson.com", pathname: "/product-images/**" },
     ],
     qualities: [75, 85],
     formats: ["image/avif", "image/webp"],

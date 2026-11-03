@@ -81,7 +81,7 @@ export async function deleteProduct(productId: string): Promise<ActionResult> {
   }
 
   // Order items keep their own name/price snapshots, so history is preserved.
-  const stored = (images ?? []).map((i) => i.storage_path).filter((p) => !p.startsWith("/"));
+  const stored = (images ?? []).map((i) => i.storage_path).filter((p) => !p.startsWith("/") && !p.startsWith("https://"));
   if (stored.length) {
     await supabase.storage.from(BUCKETS.productImages).remove(stored);
   }
@@ -179,7 +179,7 @@ export async function deleteProductImage(imageId: string): Promise<ActionResult>
 
   const { error } = await supabase.from("product_images").delete().eq("id", img.id);
   if (error) return { ok: false, error: "Could not delete the image." };
-  if (!img.storage_path.startsWith("/")) {
+  if (!img.storage_path.startsWith("/") && !img.storage_path.startsWith("https://")) {
     await supabase.storage.from(BUCKETS.productImages).remove([img.storage_path]);
   }
 

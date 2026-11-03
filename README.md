@@ -46,7 +46,7 @@ Storage buckets only accept `image/webp` up to 2 MB, so nothing else can be stor
 1. Create a project at [supabase.com](https://supabase.com).
 2. **Quickest:** open **SQL Editor** and run the whole of `supabase/setup-all.sql` once (tables, security, storage, deals update and sample products in one go). Or, step by step: run `supabase/migrations/20261102000000_init.sql` (creates tables, functions, RLS policies and storage buckets).
    Then run `supabase/migrations/20261103000000_storefront_v2.sql` (adds deals filtering and one-click add-to-cart).
-3. Optional: run `supabase/seed.sql` to add 5 categories and 18 sample products (with variants, stock, sale prices and images). The sample images ship in `public/samples/`, so they work without uploading anything. Delete the products from the admin panel when you add your real catalog.
+3. Optional: run `supabase/demo-products.sql` for 27 demo products in 7 categories with real photos (served from the free DummyJSON demo catalogue), and/or `supabase/seed.sql` to add 5 categories and 18 sample products (with variants, stock, sale prices and images). The sample images ship in `public/samples/`, so they work without uploading anything. Delete the products from the admin panel when you add your real catalog.
 4. **Authentication → URL Configuration:** set *Site URL* to your domain (e.g. `https://yourstore.vercel.app`) and add `http://localhost:3000/**` and `https://yourstore.vercel.app/**` to *Redirect URLs*.
 5. Recommended — **Authentication → Email Templates → Confirm signup**, use:
    ```html
